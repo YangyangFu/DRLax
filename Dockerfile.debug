@@ -1,0 +1,8 @@
+FROM yangyangfu/drlax-cpu:latest 
+
+USER root 
+RUN pip install --upgrade pip && \
+    pip install gym==0.23.1 tensorboard
+
+USER developer 
+WORKDIR $HOME$
