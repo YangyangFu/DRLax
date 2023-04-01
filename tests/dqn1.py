@@ -7,7 +7,8 @@ from distutils.util import strtobool
 
 import flax
 import flax.linen as nn
-import gymnasium as gym
+#import gymnasium as gym
+import gym
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -144,7 +145,7 @@ if __name__ == "__main__":
     assert isinstance(envs.single_observation_space, gym.spaces.Box), "only box space is supported"
     print(type(envs.single_observation_space))
     print(gym.spaces.Box)
-    obs, _ = envs.reset()
+    obs = envs.reset()
 
     q_network = QNetwork(action_dim=envs.single_action_space.n)
 
@@ -164,7 +165,7 @@ if __name__ == "__main__":
         envs.single_observation_space,
         envs.single_action_space,
         "cpu",
-        handle_timeout_termination=True,
+        handle_timeout_termination=False, # change this may have effects 
     )
 
     @jax.jit
@@ -185,7 +186,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # TRY NOT TO MODIFY: start the game
-    obs, _ = envs.reset()
+    obs = envs.reset()
     for global_step in range(args.total_timesteps):
         # ALGO LOGIC: put action logic here
         epsilon = linear_schedule(args.start_e, args.end_e, args.exploration_fraction * args.total_timesteps, global_step)
@@ -197,8 +198,9 @@ if __name__ == "__main__":
             actions = jax.device_get(actions)
 
         # TRY NOT TO MODIFY: execute the game and log data.
-        next_obs, rewards, dones, _, infos = envs.step(actions)
-
+        next_obs, rewards, dones, infos= envs.step(actions)
+        #print(truncs)
+        print(infos)
         # TRY NOT TO MODIFY: record rewards for plotting purposes
         for info in infos:
             if "episode" in info.keys():
@@ -213,6 +215,7 @@ if __name__ == "__main__":
         for idx, d in enumerate(dones):
             if d:
                 real_next_obs[idx] = infos[idx]["terminal_observation"]
+        print([info for info in infos])
         rb.add(obs, real_next_obs, actions, rewards, dones, infos)
 
         # TRY NOT TO MODIFY: CRUCIAL step easy to overlook
@@ -222,6 +225,8 @@ if __name__ == "__main__":
         if global_step > args.learning_starts:
             if global_step % args.train_frequency == 0:
                 data = rb.sample(args.batch_size)
+                print(dir(data))
+                print(ssss)
                 # perform a gradient-descent step
                 loss, old_val, q_state = update(
                     q_state,
