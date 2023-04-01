@@ -1,8 +1,12 @@
 FROM yangyangfu/drlax-cpu:latest 
 
 USER root 
+# add stable-basedlines3 for gymnasium support, which has not been mergered into stable-baselines3 yet
+# we need this as we're using stable-baselines3 replay buffer for our experiments
+# to remove dependency on stable-baselines3, we need to implement our own replay buffer in JAX 
+
 RUN pip install --upgrade pip && \
-    pip install gym==0.23.1 tensorboard
+    pip install gym==0.23.1 tensorboard git+https://github.com/Stable-Baselines-Team/stable-baselines3-contrib@feat/gymnasium-support
 
 USER developer 
 WORKDIR $HOME$
